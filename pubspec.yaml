@@ -1,0 +1,38 @@
+name: dbibackend
+description: Desktop USB backend for the DBI installer on the Nintendo Switch.
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: ^3.14.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # -- Pub packages --
+  bloc_concurrency: ^0.3.0
+  flutter_bloc: ^9.1.1
+  flutter_hooks: ^0.21.4
+  nativeapi_flutter: ^0.6.1
+  slang: ^4.19.2
+  slang_flutter: ^4.19.0
+  window_manager: ^0.7.0
+  usb_host: ^0.1.0
+
+dev_dependencies:
+  flutter_launcher_icons: ^0.14.4
+  leancode_lint: ^28.0.0
+
+flutter_launcher_icons:
+  ios: false
+  android: false
+  macos:
+    generate: true
+    image_path: assets/ic_macos.png
+  windows:
+    generate: true
+    image_path: assets/ic_windows.png
+    icon_size: 256
+
+flutter:
+  uses-material-design: false

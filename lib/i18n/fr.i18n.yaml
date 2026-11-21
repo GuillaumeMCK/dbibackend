@@ -1,0 +1,64 @@
+app:
+  title: DBI Backend
+
+bootstrap:
+  window: FENÊTRE
+  failed: "[!] Échec de l'initialisation : {task}"
+
+steps:
+  retry: Réessayer
+  failed: ÉCHEC
+  # Le menu de DBI à ouvrir sur la Switch, tel que DBI le nomme.
+  menu: DBI > Install title from DBIbackend
+  titles:
+    label: TITRES
+    scanning: ANALYSE
+    scanningHint: Recherche de titres dans les éléments déposés
+    waitingHint: Déposez des fichiers .nsp, .nsz, .xci ou .xcz, ou des dossiers, sur cette fenêtre
+  usb:
+    label: USB
+    idleHint: En attente de titres
+    checking: VÉRIFICATION
+    checkingHint: Ouverture des périphériques USB
+    deniedHint: Cette application a besoin d'accéder aux périphériques USB
+  device:
+    label: SWITCH
+    searchingHint: Branchez la Switch, puis ouvrez {menu}
+    connecting: CONNEXION
+    connectingHint: Réservation de l'interface DBI
+    failedHint: Fermez les autres outils USB, puis réessayez ou rebranchez la Switch
+  install:
+    label: DBI
+    refresh: ACTUALISER
+    refreshHint: "Les titres ont changé : sur la Switch, quittez puis rouvrez {menu}"
+    listingHint: En attente de la liste des titres par DBI
+    completeHint: Tous les titres ont été envoyés
+    listedHint: Sélectionnez les titres à installer sur la Switch
+
+errors:
+  permissionDenied: Permission refusée
+  udevRule: "Permission refusée : ajoutez une règle udev pour {device}"
+  busy: La Switch est utilisée par une autre application
+  winUsb: La Switch a besoin du pilote WinUSB (installez-le avec Zadig)
+
+titles:
+  header: TITRES
+  summary:
+    one: "{n} fichier  {size}"
+    other: "{n} fichiers  {size}"
+  clear: Vider
+  scanning: Analyse...
+  dropHere: Déposez ici des fichiers .nsp, .nsz, .xci ou .xcz, ou des dossiers
+  dropToAdd: Déposez pour ajouter à la file
+
+removeDialog:
+  title: RETIRER LE TITRE
+  question: Le retirer de la liste ? Le fichier reste sur le disque.
+  dontAsk: Ne plus demander
+  yes: "Oui"
+  no: "Non"
+  cancel: Annuler
+
+units:
+  bytes: [o, Ko, Mo, Go, To]
+  decimalSeparator: ","

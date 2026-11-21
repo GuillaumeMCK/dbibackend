@@ -1,0 +1,152 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths-ignore: ['**.md', 'LICENSE']
+  pull_request:
+    paths-ignore: ['**.md', 'LICENSE']
+  workflow_dispatch:
+
+# A newer push to the same branch or pull request supersedes the running build.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: 3.50.0
+  # The exact toolchain pinned by usb_host (rust/rust-toolchain.toml), which
+  # its build hook requires. Taking precedence over that file, it also keeps
+  # rustup from downloading every target the file lists.
+  RUSTUP_TOOLCHAIN: 1.93.1
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Both macOS builds run on Apple Silicon runners: Intel is
+          # cross-compiled, which is faster than the Intel runners.
+          - name: macos-arm64
+            os: macos-15
+            rust-target: aarch64-apple-darwin
+            xcode-archs: arm64
+          - name: macos-x64
+            os: macos-15
+            rust-target: x86_64-apple-darwin
+            xcode-archs: x86_64
+          - name: windows-x64
+            os: windows-2025
+            rust-target: x86_64-pc-windows-msvc
+          - name: linux-x64
+            os: ubuntu-24.04
+            rust-target: x86_64-unknown-linux-gnu
+    env:
+      # Outside the hook's output directory, so it can be cached on its own.
+      CARGO_TARGET_DIR: ${{ github.workspace }}/cargo-target
+      # Read by `flutter build macos` as the Xcode ARCHS setting, so a macOS
+      # build compiles a single architecture instead of a universal app.
+      FLUTTER_XCODE_ARCHS: ${{ matrix.xcode-archs }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libstdc++-12-dev libx11-dev libxi-dev
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.RUSTUP_TOOLCHAIN }}
+          targets: ${{ matrix.rust-target }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          # The SDK, and the pub cache keyed on pubspec.lock.
+          cache: true
+
+      - name: Get packages
+        run: |
+          # Keeps FLUTTER_XCODE_ARCHS in charge of the macOS architecture.
+          flutter config --no-analytics --no-cli-animations \
+            --no-enable-macos-arm64-only > /dev/null
+          flutter pub get
+          # The translations are generated, not committed.
+          dart run slang
+
+      # usb_host's Rust library and the C++ of nativeapi, both built by build
+      # hooks, keyed on the locked package versions.
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            cargo-target
+            .dart_tool/hooks_runner
+          key: native-${{ matrix.name }}-${{ hashFiles('pubspec.lock') }}
+          restore-keys: native-${{ matrix.name }}-
+
+      - name: Analyze
+        if: runner.os == 'Linux'
+        run: flutter analyze
+
+      - name: Build
+        run: flutter build ${{ runner.os == 'macOS' && 'macos' || runner.os == 'Windows' && 'windows' || 'linux' }} --release --no-pub
+
+      - name: Package
+        run: |
+          mkdir -p dist
+          archive=dist/dbibackend-${{ matrix.name }}
+          case "${{ runner.os }}" in
+            macOS)
+              ditto -c -k --sequesterRsrc --keepParent \
+                build/macos/Build/Products/Release/dbibackend.app "$archive.zip" ;;
+            Windows)
+              7z a -tzip -bso0 "$archive.zip" ./build/windows/x64/runner/Release/* ;;
+            Linux)
+              tar -C build/linux/x64/release/bundle -czf "$archive.tar.gz" . ;;
+          esac
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dbibackend-${{ matrix.name }}
+          path: dist/*
+          # Already compressed.
+          compression-level: 0
+          retention-days: 30
+
+  release:
+    name: Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create "$GITHUB_REF_NAME" dist/*
+          --repo "$GITHUB_REPOSITORY" --title "$GITHUB_REF_NAME" --generate-notes

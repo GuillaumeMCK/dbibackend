@@ -1,0 +1,64 @@
+app:
+  title: DBI Backend
+
+bootstrap:
+  window: WINDOW
+  failed: "[!] {task} setup failed"
+
+steps:
+  retry: Retry
+  failed: FAILED
+  # The DBI menu the Switch must open, as DBI names it.
+  menu: DBI > Install title from DBIbackend
+  titles:
+    label: TITLES
+    scanning: SCANNING
+    scanningHint: Looking for titles in the dropped files
+    waitingHint: Drop .nsp, .nsz, .xci or .xcz files or folders on this window
+  usb:
+    label: USB
+    idleHint: Waiting for titles
+    checking: CHECKING
+    checkingHint: Opening USB devices
+    deniedHint: This app needs access to USB devices
+  device:
+    label: SWITCH
+    searchingHint: Plug the Switch in, then open {menu}
+    connecting: CONNECTING
+    connectingHint: Claiming the DBI interface
+    failedHint: Close other USB tools, then retry or replug the Switch
+  install:
+    label: DBI
+    refresh: REFRESH
+    refreshHint: "The titles changed: on the Switch, leave and reopen {menu}"
+    listingHint: Waiting for DBI to list the titles
+    completeHint: Every title was sent
+    listedHint: Select the titles to install on the Switch
+
+errors:
+  permissionDenied: Permission denied
+  udevRule: "Permission denied: add a udev rule for {device}"
+  busy: The Switch is used by another application
+  winUsb: The Switch needs the WinUSB driver (install it with Zadig)
+
+titles:
+  header: TITLES
+  summary:
+    one: "{n} file  {size}"
+    other: "{n} files  {size}"
+  clear: Clear
+  scanning: Scanning...
+  dropHere: Drop .nsp, .nsz, .xci or .xcz files or folders here
+  dropToAdd: Drop to add to the queue
+
+removeDialog:
+  title: REMOVE TITLE
+  question: Remove it from the list? The file stays on disk.
+  dontAsk: Don't ask again
+  yes: "Yes"
+  no: "No"
+  cancel: Cancel
+
+units:
+  bytes: [B, KB, MB, GB, TB]
+  decimalSeparator: "."
