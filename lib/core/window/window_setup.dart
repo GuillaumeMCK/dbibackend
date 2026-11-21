@@ -8,9 +8,9 @@ abstract final class WindowSetup {
   static const minimumSize = Size(560, 420);
 
   /// Runs before the first frame: opens the window at its minimum size,
-  /// centered. On macOS, hides the title bar but not its buttons, which
-  /// [WindowFrame] makes room for; Windows and Linux keep their native title
-  /// bar, as hiding it hides their buttons too.
+  /// centered. Hides the title bar on macOS, keeping its buttons, which
+  /// [WindowFrame] makes room for, and on Windows, where [WindowFrame] draws
+  /// them. Linux keeps its native title bar.
   static void setUp() {
     final window = WindowManager.instance.getCurrent();
     if (window == null) return;
@@ -18,6 +18,8 @@ abstract final class WindowSetup {
       window
         ..titleBarStyle = .hidden
         ..isWindowControlButtonsVisible = true;
+    } else if (Platform.isWindows) {
+      window.titleBarStyle = .hidden;
     }
     final size = minimumSize.toNative();
     window
