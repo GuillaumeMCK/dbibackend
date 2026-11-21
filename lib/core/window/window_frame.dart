@@ -4,9 +4,9 @@ import 'package:window_manager/window_manager.dart';
 
 import 'window_metrics.dart';
 
-/// The chrome of the frameless window: a title bar holding the native window
-/// buttons (hidden in full screen) and sized after the OS ([WindowMetrics]),
-/// above the content.
+/// The chrome of the window: on macOS, a title bar holding the native window
+/// buttons (hidden in full screen, sized by [WindowMetrics]), above the
+/// content.
 class const WindowFrame({super.key, required final Widget child})
     extends HookWidget {
   static final _metrics = WindowMetrics.current;

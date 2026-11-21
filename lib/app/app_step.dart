@@ -18,14 +18,16 @@ enum AppStep {
   };
 }
 
-/// The current [step], what happens in it ([status], or [waiting] for
-/// something, none once it is done), what to do ([hint]) and, when it failed,
-/// why ([error]).
+/// What a step is busy with, when it has no [AppProgress.status] to show.
+enum AppActivity { waiting, sending }
+
+/// The current [step], what happens in it ([status] or [activity], none once
+/// it is done), what to do ([hint]) and, when it failed, why ([error]).
 final class const AppProgress({
   required final AppStep step,
   required final String hint,
   final String? status,
-  final bool waiting = false,
+  final AppActivity? activity,
   final String? error,
 }) {
   factory AppProgress.of(TitlesState titles, LinkState link) {
@@ -38,12 +40,12 @@ final class const AppProgress({
       ),
       (TitlesState(titles: []), _) => AppProgress(
         step: .titles,
-        waiting: true,
+        activity: .waiting,
         hint: steps.titles.waitingHint,
       ),
       (_, LinkIdle()) => AppProgress(
         step: .usb,
-        waiting: true,
+        activity: .waiting,
         hint: steps.usb.idleHint,
       ),
       (_, LinkCheckingAccess()) => AppProgress(
@@ -60,7 +62,7 @@ final class const AppProgress({
       // DBI only shows up on USB once its backend menu is open.
       (_, LinkSearching()) => AppProgress(
         step: .device,
-        waiting: true,
+        activity: .waiting,
         hint: steps.device.searchingHint(menu: steps.menu),
       ),
       (_, LinkConnecting()) => AppProgress(
@@ -74,6 +76,11 @@ final class const AppProgress({
         hint: steps.device.failedHint,
         error: LinkError.describe(error),
       ),
+      (TitlesState(sending: true), LinkConnected()) => AppProgress(
+        step: .install,
+        activity: .sending,
+        hint: steps.install.sendingHint,
+      ),
       (TitlesState(outdated: true), LinkConnected()) => AppProgress(
         step: .install,
         status: steps.install.refresh,
@@ -81,7 +88,7 @@ final class const AppProgress({
       ),
       (TitlesState(listed: null), LinkConnected()) => AppProgress(
         step: .install,
-        waiting: true,
+        activity: .waiting,
         hint: steps.install.listingHint,
       ),
       (TitlesState(:final completed, :final titles), LinkConnected())

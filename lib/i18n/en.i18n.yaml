@@ -32,6 +32,7 @@ steps:
     refresh: REFRESH
     refreshHint: "The titles changed: on the Switch, leave and reopen {menu}"
     listingHint: Waiting for DBI to list the titles
+    sendingHint: Sending the titles to the Switch
     completeHint: Every title was sent
     listedHint: Select the titles to install on the Switch
 

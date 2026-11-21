@@ -8,15 +8,16 @@ import '/link/link_cubit.dart';
 import '/titles/titles_bloc.dart';
 import 'app_step.dart';
 
-/// `LABEL ... STATUS` (dots while waiting, none once done), then the reason
-/// it failed, the hint, and a retry button for a failed step.
+/// `LABEL ... STATUS` (dots while waiting, a spinner while sending, none once
+/// done), then the reason it failed, the hint, and a retry button for a failed
+/// step.
 class const AppFooter({super.key}) extends StatelessWidget {
   static const _error = TextStyle(color: Palette.error);
 
   @override
   Widget build(BuildContext context) {
     final link = context.watch<LinkCubit>();
-    final AppProgress(:step, :status, :waiting, :hint, :error, :failed) = .of(
+    final AppProgress(:step, :status, :activity, :hint, :error, :failed) = .of(
       context.watch<TitlesBloc>().state,
       link.state,
     );
@@ -30,7 +31,11 @@ class const AppFooter({super.key}) extends StatelessWidget {
             spacing: 12,
             children: [
               Expanded(child: Text(step.label, style: TextStyles.accent)),
-              if (waiting) const Dots(),
+              ?switch (activity) {
+                .waiting => const Dots(),
+                .sending => const Spinner(),
+                null => null,
+              },
               if (status != null)
                 Flexible(
                   child: Text(

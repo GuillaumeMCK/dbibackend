@@ -32,6 +32,7 @@ steps:
     refresh: ACTUALISER
     refreshHint: "Les titres ont changé : sur la Switch, quittez puis rouvrez {menu}"
     listingHint: En attente de la liste des titres par DBI
+    sendingHint: Envoi des titres à la Switch
     completeHint: Tous les titres ont été envoyés
     listedHint: Sélectionnez les titres à installer sur la Switch
 

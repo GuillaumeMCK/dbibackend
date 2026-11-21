@@ -74,6 +74,9 @@ final class const TitlesState({
 
   int get totalSize => titles.fold(0, (total, title) => total + title.size);
 
+  /// A title is being sent: the list is locked until it is done.
+  bool get sending => titles.any((title) => title.status is TitlesSending);
+
   int get completed => titles.where((t) => t.status is TitlesCompleted).length;
 
   /// The Switch listed the titles, and the queue changed since: DBI only asks

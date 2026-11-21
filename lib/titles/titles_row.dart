@@ -8,14 +8,17 @@ import '/core/widgets/widgets.dart';
 import 'titles_bloc.dart';
 import 'titles_remove_dialog.dart';
 
-/// A queued title: its name and size.
-/// Clicking it (or Enter while focused) removes it from the list, once
-/// confirmed, unless it is being sent.
-class const TitlesRow(final TitlesItem title, {super.key}) extends HookWidget {
+/// A queued title: its name and size. Clicking it (or Enter while focused)
+/// removes it from the list, once confirmed, unless the list is [locked].
+class const TitlesRow(
+  final TitlesItem title, {
+  super.key,
+  final bool locked = false,
+}) extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final (:highlighted, :detector) = useHighlight();
-    final removable = title.status is! TitlesSending;
+    final removable = !locked;
     return detector(
       onActivate: removable ? () => _remove(context) : null,
       child: Bar(

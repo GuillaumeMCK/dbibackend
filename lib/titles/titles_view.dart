@@ -31,7 +31,8 @@ class const TitlesView({super.key, required final bool dragging})
             ),
             TitlesState(:final titles) => ListView.builder(
               itemCount: titles.length,
-              itemBuilder: (context, index) => TitlesRow(titles[index]),
+              itemBuilder: (context, index) =>
+                  TitlesRow(titles[index], locked: state.sending),
             ),
           },
         ),
@@ -59,7 +60,7 @@ class const _Summary(final TitlesState state) extends StatelessWidget {
             ),
           }, style: TextStyles.dim),
         ),
-        if (state.titles.isNotEmpty)
+        if (state.titles.isNotEmpty && !state.sending)
           Button(
             t.titles.clear,
             onPressed: () =>
